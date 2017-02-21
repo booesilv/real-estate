@@ -7,16 +7,31 @@
 </head>
 
 <body>
-    <p>Welcome to our house pricing comparator <br>
-        Price of this house is <%= message %> euros <br>
-        Surface : <%= message2 %> m^2 <br>
-        City : <%= message3 %> <br>
-        Postal code : <%= message4 %> <br>
-        Type of property : <%= message5 %> <br>
-        Price for 1M^2 : <%= message7 %> <br>
-        Estimation : <%= message8 %> <br>
-        Verdict : <%= message9 %> <br>     
-    </p>
+    <p>WELCOME TO OUR REAL ESTATE COMPARATOR<br />
+    Please enter a URL le bon coin and push two time the button ok
+        
+    
+    <form action="/" method="GET">
+        <input type="text" name="urlLBC" />
+        <button type="submit">
+            OK
+        </button>
+         
+
+    </form>
+    
+    This is the url of the offer that we are comparing:   <%= message %> <br />
+      
+        
+        Price of the home : <%= RealEstateAdPrice %> € <br />
+        Surface of the house : <%=RealEstateAdSurface %> m2 <br />
+        Price by square meter : <%=RealEstateAdPricePerM2 %> €  <br />
+        Type of house: <%=RealEstateAdType %>  <br />
+        City and postal code : <%=RealEstateAdCity %>  <br />
+        Average price of a house in this town : <%= message1 %> <br />
+        Verdict : <%= message2 %>
+      
+    </p>  
 </body>
 
 </html>

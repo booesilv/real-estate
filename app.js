@@ -54,7 +54,7 @@ function dataRecuperer( body ) {
 */
 
 //Function qui remplace une chaine de caractère par une autre dans la variable expr
-function Remplace( expr, a, b ) {
+/*function Remplace( expr, a, b ) {
     var i = 0
     while ( i != -1 ) {
         i = expr.indexOf( a, i );
@@ -134,69 +134,178 @@ app.get( '/', function ( req, res ) {
 
 
             //On entre directement sur le résultat de la recherche avec la concaténation du site avec la ville - codePostal : 
-            request( 'https://www.meilleursagents.com/prix-immobilier/' + info.city.toLowerCase() + '-' + info.codePostal, function ( error, response, body ) {
-                if ( !error && response.statusCode == 200 ) {
-                    var averagePrice = "";
-                    //Il faut maintenant récupérer le prix moyen du mètre carré : 
-                    var $ = cheerio.load( body );
-                    $( 'div.small-12.medium-6.columns.prices-summary__cell--row-header ' ).each( function ( i, element ) {
-                        var a = $( this );
-                        //Si on cherche le prix au m2 d'un appartement : 
-                        if ( info.type == "Appartement" ) {
+     request( 'https://www.meilleursagents.com/prix-immobilier/' + lbcData.city.toLowerCase(), function ( error, response, body ) {
+     if ( !error && response.statusCode == 200 ) {
+        var averagePrice = "";
+        //Il faut maintenant récupérer le prix moyen du mètre carré : 
+        var $ = cheerio.load( body );
+        $( 'div.small-12.medium-6.columns.prices-summary__cell--row-header ' ).each( function ( i, element ) {
+            var a = $( this );
+            //Si on cherche le prix au m2 d'un appartement : 
+            if ( lbcData.type == "Appartement" ) {
 
-                            if ( a.children()[0].next.data == "Prix m2 appartement" ) {
-                                averagePrice = a.next().next().text();
-                                averagePrice = averagePrice.substring( 14, 19 );
-                                averagePrice = averagePrice.split( " " );
-                                estimation.Averageprice = averagePrice[0] + averagePrice[1];
-                            }
-                        }
-                        //Si on cherche le prix au m2 d'une maison : 
-                        if ( info.type == "Maison" ) {
-                            if ( a.children()[0].next.data == " Prix m2 maison" ) {
-                                averagePrice = a.next().next().text();
-                                averagePrice = averagePrice.substring( 14, 19 );
-                                averagePrice = averagePrice.split( " " );
-                                estimation.Averageprice = averagePrice[0] + averagePrice[1];
-                            }
-                        }
-                    });
+                if ( a.children()[0].next.data == "Prix m2 appartement" ) {
+                    averagePrice = a.next().next().text();
+                    averagePrice = averagePrice.substring( 14, 19 );
+                    averagePrice = averagePrice.split( " " );
+                    estimation.Averageprice = averagePrice[0] + averagePrice[1];
                 }
-                //Il ne reste plus qu'à comparer les deux valeurs et donner un verdict : 
-                var verdict = "";
-                if ( estimation.Averageprice < info.prixM2 ) {
-                    verdict = "Le prix au m2 de ce bien est au dessus de la moyenne pour cette ville.";
+            }
+            //Si on cherche le prix au m2 d'une maison : 
+            if ( info.type == "Maison" ) {
+                if ( a.children()[0].next.data == " Prix m2 maison" ) {
+                    averagePrice = a.next().next().text();
+                    averagePrice = averagePrice.substring( 14, 19 );
+                    averagePrice = averagePrice.split( " " );
+                    estimation.Averageprice = averagePrice[0] + averagePrice[1];
                 }
-                else if ( estimation.Averageprice == info.prixM2 ) {
-                    verdict = "Le prix au m2 de ce bien est exactement celui de la moyenne pour cette ville"
-                }
-                else {
-                    verdict = "Le prix au m2 de ce bien est inférieur à celui de la moyenne pour cette ville"
-                }
+            }
+        });
+    }
+    //Il ne reste plus qu'à comparer les deux valeurs et donner un verdict : 
+    var verdict = "";
+    if ( estimation.Averageprice < lbcData.prixM2 ) {
+        verdict = "Le prix au m2 de ce bien est au dessus de la moyenne pour cette ville.";
+    }
+    else if ( estimation.Averageprice == lbcData.prixM2 ) {
+        verdict = "Le prix au m2 de ce bien est exactement celui de la moyenne pour cette ville"
+    }
+    else {
+        verdict = "Le prix au m2 de ce bien est inférieur à celui de la moyenne pour cette ville"
+    }
 
 
-                //Affichage des données dans la page Web :
-                res.render( 'home', {
+     //Affichage des données dans la page Web :
+     res.render( 'home', {
 
-                    message: info.price,
-                    message2: info.surface,
-                    message3: info.city,
-                    message4: info.codePostal,
-                    message5: info.type,
-                    message7: info.prixM2,
-                    message8: estimation.Averageprice,
-                    message9: verdict,
-                });
-            });
-
-        }
-    })
+         message: info.price,
+         message2: info.surface,
+         message3: info.city,
+         message4: info.codePostal,
+         message5: info.type,
+         message7: info.prixM2,
+         message8: estimation.Averageprice,
+         message9: verdict,
+     });
 });
 
+// }
+//})
+//});
+*/
 
+var lbcData = {
+    Title: "General information of the property",
+    price: 0,
+    Surface: 0,
+    city: '',
+    room: '',
+    type: "",
+    priceM2: 0,
+};
+
+var estimation = {
+    Title: "Estate valuation",
+    Averageprice: 0,
+}
+
+
+
+function callleboncoin( url ) {
+    //var url = 'https://www.leboncoin.fr/ventes_immobilieres/1084183943.htm?ca=12_s'
+    request( url, function ( error, response, html ) {
+        if ( !error && response.statusCode == 200 ) {
+
+            const $ = cheerio.load( html )
+
+            const lbcDataArray = $( 'section.properties span.value' )
+
+            lbcData = {
+                price: parseInt( $( lbcDataArray.get( 0 ) ).text().replace( /\s/g, '' ), 10 ),
+                city: $( lbcDataArray.get( 1 ) ).text().trim().toLowerCase().replace( /\_|\s/g, '-' ),
+                type: $( lbcDataArray.get( 2 ) ).text().trim().toLowerCase(),
+                room: $( lbcDataArray.get( 3 ) ).text(),
+                Surface: parseInt( $( lbcDataArray.get( 4 ) ).text().replace( /\s/g, '' ), 10 ),
+                priceM2: parseInt( $( lbcDataArray.get( 0 ) ).text().replace( /\s/g, '' ), 10 ) / parseInt( $( lbcDataArray.get( 4 ) ).text().replace( /\s/g, '' ), 10 ),
+
+            }
+            console.log( lbcData )
+        }
+        else {
+            console.log( error )
+        }
+    })
+}
+
+
+function calllemeilleuragent() {
+    var url2 = 'https://www.meilleursagents.com/prix-immobilier/' + lbcData.city.toLowerCase()
+    request( url2, function ( error, response, html ) {
+        if ( !error && response.statusCode == 200 ) {
+
+            const $ = cheerio.load( html )
+
+            var averagePrice = ""
+            $( 'div.small-12.medium-6.columns.prices-summary__cell--row-header ' ).each( function ( i, element ) {
+                var a = $( this );
+                //Si on cherche le prix au m2 d'un appartement : 
+                if ( lbcData.type == "Appartement" ) {
+
+                    if ( a.children()[0].next.data == "Prix m2 appartement" ) {
+                        averagePrice = a.next().next().text();
+                        averagePrice = averagePrice.substring( 2, 5 );
+                        averagePrice = averagePrice.split( " " );
+                        estimation.Averageprice = averagePrice[0] + averagePrice[1];
+                    }
+                }
+
+                //Si on cherche le prix au m2 d'une maison : 
+                if ( lbcData.type == "Maison" ) {
+                    if ( a.children()[0].next.data == " Prix m2 maison" ) {
+                        averagePrice = a.next().next().text();
+                        averagePrice = averagePrice.substring( 2, 5 );
+                        averagePrice = averagePrice.split( " " );
+                        estimation.Averageprice = averagePrice[0] + averagePrice[1];
+                    }
+                }
+            })
+        }
+    })
+
+}
+
+//Il ne reste plus qu'à comparer les deux valeurs et donner un verdict : 
+var verdict = "";
+if ( estimation.Averageprice < lbcData.priceM2 ) {
+    verdict = "Le prix au m2 de ce bien est au dessus de la moyenne pour cette ville.";
+}
+if ( estimation.Averageprice == lbcData.priceM2 ) {
+    verdict = "Le prix au m2 de ce bien est exactement celui de la moyenne pour cette ville"
+}
+if ( estimation.Averageprice > lbcData.priceM2 ) {
+    verdict = "Le prix au m2 de ce bien est inférieur à celui de la moyenne pour cette ville"
+};
+
+app.get( '/', function ( req, res ) {
+    var url = req.query.urlLBC
+    callleboncoin( url );
+    calllemeilleuragent();
+    res.render( 'home', {
+        message: url,
+        RealEstateAdPrice: lbcData.price,
+        RealEstateAdSurface: lbcData.Surface,
+        RealEstateAdPricePerM2: lbcData.priceM2,
+        RealEstateAdType: lbcData.type,
+        RealEstateAdCity: lbcData.city,
+        message1: estimation.Averageprice,
+        message2: verdict,
+    });
+});
 
 
 //launch the server on the 3000 port
 app.listen( 3000, function () {
     console.log( 'App listening on port 3000!' );
 });
+
+
