@@ -1,5 +1,9 @@
 body {
     background: #34495e;
-    color: white;
-    padding: 50px;
+    color:black;
+    padding: 350px;
+    font-size: large; 
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image:url(http://www.azurlogement.com/site/images/normal/terrains-luberon536a0690256bd.jpg);
 }

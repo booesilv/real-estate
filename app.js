@@ -27,11 +27,9 @@ var estimation = {
     Averageprice: 0,
 }
 
-
-
-function callleboncoin( url ) {
-    var url
-    request( url, function ( error, response, html ) {
+function callleboncoin( url1 ) {
+    var url1 = 'https://www.leboncoin.fr/ventes_immobilieres/1082799054.htm?ca=12_s'
+    request( url1, function ( error, response, html ) {
         if ( !error && response.statusCode == 200 ) {
 
             const $ = cheerio.load( html )
